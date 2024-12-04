@@ -12,15 +12,12 @@ class ExcelRenamerApp:
         self.file_path = None
         self.workbook = None
         self.sheet_names = []
+        self.is_topmost = False  # 用于跟踪窗口是否置顶
         
         # UI Components
         self.create_widgets()
         
     def create_widgets(self):
-        # 显示当前时间
-        self.time_label = tk.Label(self.root, text=self.get_current_time())
-        self.time_label.pack(side=tk.LEFT)
-        
         # 显示当前打开的文件名称
         self.file_label = tk.Label(self.root, text="当前文件: 未打开")
         self.file_label.pack(side=tk.RIGHT)
@@ -28,6 +25,10 @@ class ExcelRenamerApp:
         # 显示当前文件的修改时间
         self.modified_time_label = tk.Label(self.root, text="修改时间: 未知")
         self.modified_time_label.pack(side=tk.TOP)
+        
+        # 显示当前时间（左下角）
+        self.time_label = tk.Label(self.root, text=self.get_current_time())
+        self.time_label.pack(side=tk.LEFT, anchor='sw')
         
         # 显示表格名称
         self.sheet_listbox = tk.Listbox(self.root, selectmode=tk.MULTIPLE)
@@ -43,9 +44,18 @@ class ExcelRenamerApp:
         self.exit_button = tk.Button(self.root, text="退出程序", command=self.root.quit)
         self.exit_button.pack(side=tk.LEFT)
         
+        # 置顶按钮
+        self.topmost_button = tk.Button(self.root, text="置顶", command=self.toggle_topmost)
+        self.topmost_button.pack(side=tk.TOP, anchor='ne')  # 右上角
+        
         # 打开文件按钮
         self.open_button = tk.Button(self.root, text="打开文件", command=self.open_file)
         self.open_button.pack(side=tk.BOTTOM)
+
+    def toggle_topmost(self):
+        self.is_topmost = not self.is_topmost
+        self.root.attributes('-topmost', self.is_topmost)
+        self.topmost_button.config(text="取消置顶" if self.is_topmost else "置顶")
 
     def get_current_time(self):
         return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -95,7 +105,7 @@ class ExcelRenamerApp:
             del self.sheet_names[index]
             self.sheet_listbox.delete(index)
         self.workbook.save(self.file_path)
-        self.update_ui()
+        self.update_ui()  # 更新 UI，清空表格名称
 
 if __name__ == "__main__":
     root = tk.Tk()
