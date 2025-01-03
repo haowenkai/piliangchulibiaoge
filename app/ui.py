@@ -27,4 +27,3 @@ def create_widgets(app):
     # 显示当前时间（左下角）
     app.time_label = tk.Label(app.root, text="", bg="#f0f0f0", font=("Arial", 10))
     app.time_label.pack(side=tk.BOTTOM, anchor='se', padx=10, pady=(5, 10))  # 右下角
- 
