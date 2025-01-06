@@ -75,6 +75,9 @@ class ExcelRenamerApp:
             try:
                 for index in selected_indices:
                     old_name = self.excel_manager.sheet_names[index]
+                    if new_name in self.excel_manager.workbook.sheetnames:
+                        messagebox.showerror("错误", f"工作表 '{new_name}' 已存在，请使用其他名称。")
+                        return
                     self.excel_manager.rename_sheet(old_name, new_name)
                 self.excel_manager.save_workbook()
                 self.update_ui()
@@ -89,15 +92,16 @@ class ExcelRenamerApp:
             messagebox.showwarning("警告", "请先选择要删除的表格名称")
             return
         
-        try:
-            for index in reversed(selected_indices):
-                sheet_name = self.excel_manager.sheet_names[index]
-                self.excel_manager.delete_sheet(sheet_name)
-            self.excel_manager.save_workbook()
-            self.update_ui()
-        except Exception as e:
-            messagebox.showerror("错误", str(e))
-            logger.error(f"删除失败: {str(e)}")
+        if messagebox.askyesno("确认", "确定要删除选中的工作表吗？"):
+            try:
+                for index in reversed(selected_indices):
+                    sheet_name = self.excel_manager.sheet_names[index]
+                    self.excel_manager.delete_sheet(sheet_name)
+                self.excel_manager.save_workbook()
+                self.update_ui()
+            except Exception as e:
+                messagebox.showerror("错误", str(e))
+                logger.error(f"删除失败: {str(e)}")
 
 if __name__ == "__main__":
     root = tk.Tk()
