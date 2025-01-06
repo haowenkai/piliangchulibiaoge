@@ -3,7 +3,7 @@ from pathlib import Path
 from datetime import datetime
 import os
 from typing import Tuple, List, Optional
-from . import logger
+from app.logging_config import logger
 import openpyxl
 
 class ExcelManager:
@@ -69,3 +69,51 @@ class ExcelManager:
             ).strftime('%Y-%m-%d %H:%M:%S')
             return filename, modified_time
         return "未打开", "未知"
+
+    def read_sheet_data(self, sheet_name: str) -> List[List]:
+        """读取工作表数据"""
+        if self.workbook and sheet_name in self.sheet_names:
+            sheet = self.workbook[sheet_name]
+            data = []
+            for row in sheet.iter_rows():
+                row_data = [cell.value for cell in row]
+                data.append(row_data)
+            logger.info(f"成功读取工作表 '{sheet_name}' 的数据")
+            return data
+        else:
+            logger.error(f"无法读取工作表 '{sheet_name}'，工作表不存在或工作簿未加载")
+            return []
+
+    def write_sheet_data(self, sheet_name: str, data: List[List]) -> None:
+        """写入工作表数据"""
+        if self.workbook and sheet_name in self.sheet_names:
+            sheet = self.workbook[sheet_name]
+            for row_index, row_data in enumerate(data):
+                for col_index, cell_value in enumerate(row_data):
+                    sheet.cell(row=row_index + 1, column=col_index + 1, value=cell_value)
+            logger.info(f"成功向工作表 '{sheet_name}' 写入数据")
+        else:
+            logger.error(f"无法向工作表 '{sheet_name}' 写入数据，工作表不存在或工作簿未加载")
+
+    def add_sheet(self, sheet_name: str) -> None:
+        """添加新的工作表"""
+        if self.workbook:
+            try:
+                self.workbook.create_sheet(sheet_name)
+                self.sheet_names.append(sheet_name)
+                logger.info(f"成功添加新的工作表: {sheet_name}")
+            except Exception as e:
+                logger.error(f"添加新的工作表失败: {str(e)}")
+                raise
+
+    def modify_cell_data(self, sheet_name: str, row: int, column: int, value) -> None:
+        """修改单元格数据"""
+        if self.workbook and sheet_name in self.sheet_names:
+            sheet = self.workbook[sheet_name]
+            try:
+                sheet.cell(row=row, column=column).value = value
+                logger.info(f"成功修改工作表 '{sheet_name}' 的单元格 ({row}, {column}) 的值为: {value}")
+            except Exception as e:
+                logger.error(f"修改工作表 '{sheet_name}' 的单元格 ({row}, {column}) 失败: {str(e)}")
+        else:
+            logger.error(f"无法修改工作表 '{sheet_name}' 的单元格，工作表不存在或工作簿未加载")
