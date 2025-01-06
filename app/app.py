@@ -1,7 +1,6 @@
 import os
 import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog, Toplevel, Text
-from app.core import ExcelManager
 from datetime import datetime
 from dotenv import load_dotenv
 from app.ui import UI
